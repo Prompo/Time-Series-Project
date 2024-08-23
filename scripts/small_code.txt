@@ -1,0 +1,337 @@
+import os
+import pandas as pd
+import numpy as np
+from operator import itemgetter
+from datetime import datetime
+from operator import itemgetter
+from datetime import datetime
+from datetime import datetime, timedelta
+from matplotlib.dates import YearLocator, DateFormatter
+import matplotlib.pyplot as plt
+folder_path="C:/Users/anton/Desktop/Stocks"
+files=[]
+file_list=[]
+counter=0
+for filename in os.listdir(folder_path):
+    counter+=1
+    if filename.endswith(".txt"):
+        file_path = os.path.join(folder_path, filename)
+        files.append(file_path)
+        #if (counter==1):
+            #break
+  
+
+print(f"There are: {counter} files")
+
+
+
+
+start_date = '1960-01-01'
+end_date = '2017-12-31'
+
+date_range = pd.date_range(start=start_date, end=end_date)
+date_list = date_range.strftime('%Y-%m-%d').tolist()
+
+low_min={}
+high_max={}
+min_open={}
+max_open={}
+min_close={}
+max_close={}
+vol={}
+vol2={}
+vol3={}
+vol4={}
+code='none'
+stock=[]
+sell={}
+buy={}
+max_dict={}
+high_low={}
+min_met={}
+max_met={}
+op={}
+low={}
+high={}
+close={}
+op2={}
+low2={}
+high2={}
+close2={}
+op3={}
+low3={}
+high3={}
+close3={}
+op4={}
+low4={}
+high4={}
+close4={}
+op4={}
+low4={}
+high4={}
+close4={}
+
+min_low=10000
+
+warehouse={}
+code_list=[]
+fake=1
+for f in files:
+  #print(f"file:{f}")
+  code = f.split('.')[0].upper()
+  code=code.split(os.path.sep)[-1]
+  #code=path.split(os.path.sep)[-1]
+  #print(f"code:{code}")
+  if filename.endswith(".txt"):
+    file_path = os.path.join(folder_path, filename)
+    if os.stat(file_path).st_size == 0:
+        print(f"Skipping empty file: {file_path}")
+        continue
+    with open(f, 'r') as file:
+        content = file.read()
+        delimiter = ','
+        if os.stat(f).st_size == 0:
+            print(f"Skipping empty file: {file_path}")
+        else:
+            #print(os.stat(f).st_size)
+            data = pd.read_csv(f, delimiter=delimiter)
+            data.drop(['OpenInt'],axis=1)
+            warehouse[code]=data
+           
+counter=0
+
+HighLow={}
+
+
+for date in date_list:
+  HighLow[date]=(0,code)
+ 
+
+
+high_low = {}
+counter=0
+buy_min={}
+buy_close={}
+#buy_open
+dates=[]
+high_low_buy={}
+high_low_sell={}
+high_close_buy={}
+high_close_sell={}
+high_open_buy={}
+high_open_sell={}
+close_open_buy={}
+close_open_sell={}
+open_close_buy={}
+open_close_sell={}
+open_low_buy={}
+open_low_sell={}
+close_low_buy={}
+close_low_sell={}
+portofoli=1
+f=0
+N=0
+mera=[]
+agora=[]
+transactions=[]
+for code,data in warehouse.items():
+
+   counter+=1
+   #print(counter)
+   #print(code)
+
+
+   sorted_data = data.sort_values(by='Low')
+ 
+
+
+   
+   #High
+   sorted_data = data.sort_values(by='High')
+   result_data = sorted_data.tail(1)[['Date', 'High','Low','Open','Close','Volume']]
+   date_high = result_data['Date'].iloc[0]
+   date_high = pd.to_datetime(date_high)
+   date_high= date_high.strftime('%Y-%m-%d')
+   #high_low[date_high]=(100)
+   high_high = result_data['High'].iloc[0]
+   low_high = result_data['Low'].iloc[0]
+   open__high = result_data['Open'].iloc[0]
+   close_high = result_data['Close'].iloc[0]
+   vol_high=result_data['Volume'].iloc[0]
+
+   #Low
+   sorted_data = data.sort_values(by='Low')
+   result_date = result_data['Date'].iloc[0]
+   #print(f"result date: {result_date}---value:{high_high}")
+   remaining_data = sorted_data[sorted_data['Date'] <= result_date]
+   #print(remaining_data)
+   sorted_data = remaining_data.sort_values(by='Low')
+   result_data = sorted_data.head(1)[['Date', 'High','Low','Open','Close','Volume']]
+   date_low = result_data['Date'].iloc[0]
+   date_low = pd.to_datetime(date_low) 
+   date_low = date_low.strftime('%Y-%m-%d')
+   high_low = result_data['High'].iloc[0]
+   low_low = result_data['Low'].iloc[0]
+   open__low = result_data['Open'].iloc[0]
+   close_low = result_data['Close'].iloc[0]
+   vol_low=result_data['Volume'].iloc[0]
+ 
+       
+   f=0
+   if (low_low<1 and date_low<"1970-01-01" ):
+        #print(code)
+        for index , rows in data.iterrows():
+            date=rows[0]
+            op=rows[1]
+            high=rows[2]
+            low=rows[3]
+            close=rows[4]
+            vol=rows[5]
+            if(f<=798 and (close-low)>=0.01 and date<"1970-01-01"):
+                if (date=="1975-01-01" ):
+                    break
+                date=rows[0]
+                op=rows[1]
+                high=rows[2]
+                low=rows[3]
+                close=rows[4]
+                f+=2
+                d=portofoli // low
+                
+                if (d>(vol*0.1)):
+                    d=vol*0.1
+                
+                pl=int(d)
+                portofoli= portofoli - pl*low
+                mera.append(date)
+                agora.append(portofoli)
+                N+=1
+                strategy="buy-low"
+                transaction=[date,strategy,code,pl]
+                transactions.append(transaction)
+                portofoli= portofoli + pl*close
+                mera.append(date)
+                agora.append(portofoli)
+                N+=1
+                strategy="sell-close"
+                transaction=[date,strategy,code,pl]
+                transactions.append(transaction)
+                
+         
+
+   
+   
+   if (high_high-low_low>HighLow[date_low][0]):
+       dif=high_high-low_low
+       HighLow[date_low]=(dif,code)
+       high_low_buy[code]=(low_low,date_low,"buy-low",vol_low)
+       high_low_sell[code]=(high_high,date_high,"sell-high",vol_high)
+       if (date_low not in dates):
+           dates.append(date_low)
+ 
+
+
+
+print(f"\nReady to invent: {portofoli}\n")
+counter=0
+sell_time={}
+save=[]
+cosave=[]
+invest=0
+check=0
+buy=0
+sell=0
+buy_check=[]
+sell_check=[]
+buy_dict={}
+sell_dict={}
+save_code=[]
+save_dict={}
+buy=0
+sell=0
+record={}
+for date in date_list:
+    if date in dates:   
+        if (HighLow[date][0]>200 ):
+            if (high_low_buy[HighLow[date][1]][0]<50):
+                if (high_low_buy[HighLow[date][1]][1]<high_low_sell[HighLow[date][1]][1]):
+                    counter+=1
+                    strategy=high_low_buy[HighLow[date][1]][2]
+                    code=HighLow[date][1]
+                    money=portofoli*0.08
+                    d=int(money // high_low_buy[HighLow[date][1]][0])
+                    volume=high_low_buy[HighLow[date][1]][3]
+                    if (d>(volume*0.1)):
+                        d=int(volume*0.1)
+                    if (d!=0):
+                        portofoli=portofoli -d*high_low_buy[HighLow[date][1]][0]
+                        record[date]=portofoli
+                        mera.append(date)
+                        agora.append(portofoli)
+                        N+=1
+                        transaction=[date,strategy,code,d,portofoli]
+                        transactions.append(transaction)
+                        DATE=high_low_sell[code][1]
+                        save.append(DATE)
+                        save_code.append(code)
+                        strategy="buy_low"
+                        buy+=1
+                        buy_check.append([DATE,code])
+                        buy_dict[code]=(date,high_low_sell[code][1])
+                        sell_time[DATE,code]=(d,strategy,buy)
+                        save_dict[code]=DATE
+    if (date in save):
+        for code in save_code:
+            if (save_dict[code]==date and date==high_low_sell[code][1]):
+                    d=sell_time[date,code][0]
+                    strategy=sell_time[date,code][1]
+                    if (d!=0 ):
+                        N+=1
+                        volume=high_low_sell[code][3]*0.1
+                        if (d>volume*0.1):
+                            d=int(volume*0.1)
+                        check+=1
+                        money=high_low_sell[code][0]*d
+                        portofoli=portofoli+money
+                        mera.append(date)
+                        agora.append(portofoli)
+                        record[date]=portofoli
+                        strategy="sell-high"
+                        transaction=[date,strategy,code,d,portofoli]
+                        transactions.append(transaction)
+                        sell+=1
+                        sell_check.append(code)
+            
+        
+        
+            
+            
+ 
+print(f"counter:{counter}")
+print(f"portofoli:{portofoli}")
+print(f"Transactions:")
+counter=1
+print(f"N:{N}")
+for transaction in transactions:
+     print(f" {transaction[0]} {transaction[1]} {transaction[2]} {transaction[3]}")
+     counter+=1
+
+
+print(f"portofoli:{portofoli}")
+
+
+dates = [datetime.strptime(date, "%Y-%m-%d") for date in mera]
+fig, ax = plt.subplots()
+
+ax.plot(dates , agora, marker='o', linestyle='-')
+ax.set_title('Money over Time')
+ax.set_xlabel('Date')
+ax.set_ylabel('Money')
+
+# Προσαρμογή των τιμών στον άξονα x ανά δεκαετία
+ax.xaxis.set_major_locator(YearLocator(base=10))
+ax.xaxis.set_major_formatter(DateFormatter('%Y'))
+
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
